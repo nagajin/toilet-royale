@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>トイレロワイヤル v0.1 — Flush Prototype</title>
+  <style>
+    body {
+      margin: 0;
+      background: #1b2830;
+      color: #cfe3ec;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      padding: 16px;
+    }
+    h1 { font-size: 18px; margin: 0; }
+    canvas {
+      background: #dce9ef;
+      border-radius: 8px;
+      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
+      max-width: 100%;
+    }
+    #log {
+      width: 960px;
+      max-width: 100%;
+      min-height: 130px;
+      background: #10181d;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-family: monospace;
+      font-size: 13px;
+      white-space: pre-wrap;
+      box-sizing: border-box;
+    }
+  </style>
+</head>
+<body>
+  <h1>🚽 トイレロワイヤル v0.1 — 「流すか、流されるか。」</h1>
+  <canvas id="game" width="960" height="540"></canvas>
+  <pre id="log"></pre>
+  <script src="sim.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
