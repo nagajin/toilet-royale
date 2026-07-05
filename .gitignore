@@ -1,1 +1,4 @@
 .DS_Store
+
+# Godot 4 のキャッシュ・インポートデータ
+.godot/
