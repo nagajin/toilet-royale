@@ -2,6 +2,14 @@
 
 **街を汚せ，敵を流せ！**
 
+## ▶ ブラウザで遊ぶ
+
+**<https://nagajin.github.io/toilet-royale/>**
+
+インストール不要．リンクを開いて「街へ出る！」を押すだけです．
+初回だけ約10MBの読み込みがあり，開始直後の数秒はシェーダの準備で動きが重くなります．
+PCとマウスが必要です（スマートフォン・タッチ操作には未対応）．
+
 街を舞台に，うんこを投げて敵の便器へ流し込む3Dチーム対戦ゲーム．
 地面を汚して相手を滑らせ，ブラシで清掃し，食堂で食事をして補給します．
 自陣の便器の水流で敵プレイヤー本人を流すこともできます．
@@ -91,6 +99,31 @@ Godot 4.7 / macOS / Metalで確認済み．追加アセットのダウンロー�
 - [企画](docs/PROJECT_BRIEF.md) / [ゲームデザイン](docs/GAME_DESIGN.md)
 - [開発ログ](docs/DEVELOPMENT_LOG.md)
 - 本線：`game/scenes/city_battle.tscn` / `game/scripts/city/`
+
+## ブラウザ版について
+
+ブラウザではデスクトップ版と描画方式が異なります．
+
+- ブラウザはVulkanを使えないため **Compatibility レンダラ**（WebGL 2.0）で動きます．
+  SSAO・SSIL・TAA はこの方式に無く無効になります．形状・材質・影・効果音はそのままです．
+- Retinaでは画素数が4倍になり重いので，ブラウザ版は **CSSピクセル**で描画します．
+  元に戻すなら `game/project.godot` の `window/dpi/allow_hidpi.web` の行を消してください．
+- **スレッド無し**で書き出しているので `COOP`/`COEP` ヘッダが不要で，GitHub Pagesにそのまま置けます．
+- 日本語表示のため **Noto Sans JP** を同梱しています（`game/fonts/`，SIL OFL 1.1）．
+  ブラウザにはOSのフォントが無く，同梱しないと日本語がすべて豆腐（□）になります．
+
+デスクトップ版（`run-game.command`）は従来どおり Forward+ で，SSAO・SSIL・TAAも有効です．
+
+### 書き出しとデプロイ
+
+Godot 4.7 のエクスポートテンプレートが必要です（初回のみ，エディタの「エクスポートテンプレートの管理」から）．
+
+```bash
+godot --headless --path game --import --quit
+godot --headless --path game --export-release "Web" ../build/web/index.html
+```
+
+`build/web/` の中身を `.nojekyll` と一緒に `gh-pages` ブランチへ push すると公開されます．
 
 ## 過去の試作
 
