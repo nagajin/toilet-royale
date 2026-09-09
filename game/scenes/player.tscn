@@ -41,3 +41,13 @@ surface_material_override/0 = SubResource("eye_mat")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.18, 0.35, -0.46)
 mesh = SubResource("eye_mesh")
 surface_material_override/0 = SubResource("eye_mat")
+
+[node name="Scream" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7, 0)
+visible = false
+pixel_size = 0.012
+billboard = 1
+modulate = Color(1, 0.35, 0.3, 1)
+text = "うわああああ！"
+font_size = 96
+outline_size = 24

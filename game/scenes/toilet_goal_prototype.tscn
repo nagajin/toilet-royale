@@ -1,0 +1,121 @@
+[gd_scene load_steps=12 format=3]
+
+[ext_resource type="Script" path="res://scripts/toilet_goal_game.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/camera_rig.gd" id="2"]
+[ext_resource type="Script" path="res://scripts/match_hud.gd" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/toilet_goal.tscn" id="4"]
+[ext_resource type="PackedScene" path="res://scenes/ball.tscn" id="5"]
+
+[sub_resource type="StandardMaterial3D" id="floor_mat"]
+albedo_color = Color(0.13, 0.43, 0.41, 1)
+
+[sub_resource type="StandardMaterial3D" id="line_mat"]
+albedo_color = Color(0.95, 0.95, 0.95, 1)
+
+[sub_resource type="StandardMaterial3D" id="wall_mat"]
+albedo_color = Color(0.13, 0.24, 0.31, 1)
+
+[sub_resource type="ProceduralSkyMaterial" id="sky_mat"]
+
+[sub_resource type="Sky" id="sky"]
+sky_material = SubResource("sky_mat")
+
+[sub_resource type="Environment" id="env"]
+background_mode = 2
+sky = SubResource("sky")
+
+[node name="ToiletGoalPrototype" type="Node3D"]
+script = ExtResource("1")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("env")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+shadow_enabled = true
+
+[node name="Field" type="Node3D" parent="."]
+
+[node name="Floor" type="CSGBox3D" parent="Field"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+use_collision = true
+size = Vector3(48, 1, 28)
+material = SubResource("floor_mat")
+
+[node name="CenterLine" type="CSGBox3D" parent="Field"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, 0)
+size = Vector3(0.3, 0.05, 28)
+material = SubResource("line_mat")
+
+[node name="WallN" type="CSGBox3D" parent="Field"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -13.75)
+use_collision = true
+size = Vector3(48, 2, 0.5)
+material = SubResource("wall_mat")
+
+[node name="WallS" type="CSGBox3D" parent="Field"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 13.75)
+use_collision = true
+size = Vector3(48, 2, 0.5)
+material = SubResource("wall_mat")
+
+[node name="WallW" type="CSGBox3D" parent="Field"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -23.75, 1, 0)
+use_collision = true
+size = Vector3(0.5, 2, 28)
+material = SubResource("wall_mat")
+
+[node name="WallE" type="CSGBox3D" parent="Field"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23.75, 1, 0)
+use_collision = true
+size = Vector3(0.5, 2, 28)
+material = SubResource("wall_mat")
+
+[node name="GoalLeft" parent="." instance=ExtResource("4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17.5, 0, 0)
+team_name = "あか"
+team_color = Color(1, 0.404, 0.369, 1)
+
+[node name="GoalRight" parent="." instance=ExtResource("4")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 17.5, 0, 0)
+team_name = "あお"
+team_color = Color(0.38, 0.73, 1, 1)
+
+[node name="Ball" parent="." instance=ExtResource("5")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0)
+
+[node name="CameraRig" type="Node3D" parent="."]
+script = ExtResource("2")
+camera_offset = Vector3(0, 30, 30)
+
+[node name="Camera3D" type="Camera3D" parent="CameraRig"]
+current = true
+fov = 48.0
+
+[node name="MatchHUD" type="CanvasLayer" parent="."]
+script = ExtResource("3")
+
+[node name="CenterCircle" type="CSGTorus3D" parent="Field"]
+position = Vector3(0, 0.02, 0)
+inner_radius = 3.3
+outer_radius = 3.42
+sides = 64
+ring_sides = 6
+material = SubResource("line_mat")
+
+[node name="RedDirection" type="Label3D" parent="Field"]
+position = Vector3(-9, 0.08, -7)
+rotation_degrees = Vector3(-90, 0, 0)
+text = "あか →"
+modulate = Color(1, 0.6, 0.54, 1)
+font_size = 96
+pixel_size = 0.022
+outline_size = 0
+
+[node name="BlueDirection" type="Label3D" parent="Field"]
+position = Vector3(9, 0.08, -7)
+rotation_degrees = Vector3(-90, 0, 0)
+text = "← あお"
+modulate = Color(0.55, 0.8, 1, 1)
+font_size = 96
+pixel_size = 0.022
+outline_size = 0

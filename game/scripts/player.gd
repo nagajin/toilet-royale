@@ -4,22 +4,29 @@ extends CharacterBody3D
 ## 1人分のプレイヤー。入力アクション名は "p%d_*" % (player_index + 1) を参照する。
 ## 2〜4人対戦にするときは、player_index を変えたインスタンスを追加し、
 ## project.godot に p2_* 以降の入力アクションを足すだけでよい。
+##
+## 手触り調整: Movement のエクスポート変数はインスペクタから変更できる。
 
 signal flushed(player_index: int)
+signal submerged(player_index: int)
 signal fell_off(player_index: int)
 signal respawned(player_index: int)
 
-const RUN_SPEED := 6.0
-const GROUND_LERP := 12.0  # 地上での速度追従の強さ /s
-const AIR_LERP := 4.0      # 空中は入力が効きにくく、吸引にも流されやすい
-const JUMP_VELOCITY := 6.5
-const GRAVITY := 14.0
-const FLUSH_SPIN_TIME := 1.3  # 螺旋吸い込み演出の長さ
+@export var player_index := 0
+
+@export_group("Movement")
+@export var run_speed := 6.0
+## 地上での速度追従の強さ /s
+@export var ground_lerp := 12.0
+## 空中は入力が効きにくく、吸引にも流されやすい
+@export var air_lerp := 4.0
+@export var jump_velocity := 6.5
+@export var gravity := 14.0
+
+const FLUSH_SPIN_TIME := 1.6  # 螺旋吸い込み演出の長さ
 const RESPAWN_DELAY := 0.9
 
 enum State { ALIVE, FLUSHED, RESPAWNING }
-
-@export var player_index := 0
 
 var state := State.ALIVE
 var fall_count := 0
@@ -34,6 +41,7 @@ var _spiral_y := 0.0
 
 @onready var _visual: Node3D = $Visual
 @onready var _collision: CollisionShape3D = $CollisionShape3D
+@onready var _scream: Label3D = $Scream
 
 func _ready() -> void:
 	_spawn_point = global_position
@@ -51,12 +59,12 @@ func _physics_process(delta: float) -> void:
 				_respawn()
 
 func _step_alive(delta: float) -> void:
-	var prefix := "p%d" % (player_index + 1)
+	var prefix := "p%d" % [player_index + 1]
 	var input := Input.get_vector(
 		prefix + "_left", prefix + "_right", prefix + "_up", prefix + "_down"
 	)
-	var target := Vector3(input.x, 0.0, input.y) * RUN_SPEED
-	var lerp_rate := GROUND_LERP if is_on_floor() else AIR_LERP
+	var target := Vector3(input.x, 0.0, input.y) * run_speed
+	var lerp_rate := ground_lerp if is_on_floor() else air_lerp
 	var k := minf(1.0, lerp_rate * delta)
 	velocity.x += (target.x - velocity.x) * k
 	velocity.z += (target.z - velocity.z) * k
@@ -68,9 +76,9 @@ func _step_alive(delta: float) -> void:
 
 	if is_on_floor():
 		if Input.is_action_just_pressed(prefix + "_jump"):
-			velocity.y = JUMP_VELOCITY
+			velocity.y = jump_velocity
 	else:
-		velocity.y -= GRAVITY * delta
+		velocity.y -= gravity * delta
 
 	move_and_slide()
 	_update_visual(delta)
@@ -100,22 +108,29 @@ func start_flush(drain_center: Vector3) -> void:
 	_spiral_y = global_position.y
 	velocity = Vector3.ZERO
 	_collision.set_deferred("disabled", true)
+	_scream.visible = true
 	flushed.emit(player_index)
 
 func _step_flush_spiral(delta: float) -> void:
 	_state_timer -= delta
-	var t := 1.0 - _state_timer / FLUSH_SPIN_TIME
-	_spiral_angle += (7.0 + 8.0 * t) * delta
-	_spiral_radius = maxf(0.3, _spiral_radius - 3.0 * delta)
-	_spiral_y -= (1.2 + 3.0 * t) * delta
+	var t := clampf(1.0 - _state_timer / FLUSH_SPIN_TIME, 0.0, 1.0)
+	# 回転は終盤ほど速く、半径は縮み、沈む速度も加速する
+	_spiral_angle += (6.0 + 11.0 * t) * delta
+	_spiral_radius = maxf(0.3, _spiral_radius - 2.2 * delta)
+	_spiral_y -= (0.7 + 2.6 * t) * delta
 	global_position = Vector3(
 		_drain_center.x + cos(_spiral_angle) * _spiral_radius,
 		_spiral_y,
 		_drain_center.z + sin(_spiral_angle) * _spiral_radius
 	)
 	_visual.rotate_y(16.0 * delta)
-	_visual.scale = Vector3.ONE * clampf(_state_timer / FLUSH_SPIN_TIME, 0.3, 1.0)
+	# 縮みながら縦に伸びる（麺のように吸われるバカっぽさ担当）
+	var shrink := clampf(1.0 - 0.7 * t, 0.3, 1.0)
+	var stretch := 1.0 + 1.1 * sin(t * PI)
+	_visual.scale = Vector3(shrink, shrink * stretch, shrink)
 	if _state_timer <= 0.0:
+		_scream.visible = false
+		submerged.emit(player_index)
 		hide()
 		state = State.RESPAWNING
 		_state_timer = RESPAWN_DELAY
@@ -141,6 +156,7 @@ func _respawn() -> void:
 	velocity = Vector3.ZERO
 	_visual.scale = Vector3.ONE
 	_visual.rotation = Vector3.ZERO
+	_scream.visible = false
 	_collision.set_deferred("disabled", false)
 	state = State.ALIVE
 	show()

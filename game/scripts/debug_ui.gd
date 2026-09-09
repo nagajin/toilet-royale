@@ -10,8 +10,9 @@ const MAX_LOG_LINES := 8
 
 var _log_lines: PackedStringArray = PackedStringArray()
 
-func set_status(text: String) -> void:
+func set_status(text: String, color: Color = Color.WHITE) -> void:
 	_phase_label.text = text
+	_phase_label.add_theme_color_override("font_color", color)
 
 func show_center(text: String, color: Color) -> void:
 	_center_label.text = text

@@ -1,0 +1,76 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/toilet_goal.gd" id="1"]
+
+[sub_resource type="StandardMaterial3D" id="porcelain_mat"]
+albedo_color = Color(0.93, 0.94, 0.96, 1)
+
+[sub_resource type="CylinderMesh" id="water_mesh"]
+top_radius = 2.2
+bottom_radius = 1.5
+height = 0.3
+
+[sub_resource type="StandardMaterial3D" id="water_mat"]
+transparency = 1
+albedo_color = Color(0.25, 0.6, 0.9, 0.65)
+
+[sub_resource type="BoxMesh" id="spoke_mesh"]
+size = Vector3(4, 0.1, 0.4)
+
+[sub_resource type="StandardMaterial3D" id="swirl_mat"]
+albedo_color = Color(1, 1, 1, 1)
+
+[node name="ToiletGoal" type="Node3D"]
+script = ExtResource("1")
+
+[node name="Seat" type="CSGTorus3D" parent="."]
+transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0, 2.2, 0)
+use_collision = true
+inner_radius = 2.6
+outer_radius = 3.3
+sides = 40
+ring_sides = 12
+
+[node name="WallL" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.6, 0.8, -2.6)
+use_collision = true
+size = Vector3(4.6, 1.6, 0.4)
+material = SubResource("porcelain_mat")
+
+[node name="WallR" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.6, 0.8, 2.6)
+use_collision = true
+size = Vector3(4.6, 1.6, 0.4)
+material = SubResource("porcelain_mat")
+
+[node name="Tank" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.1, 2.5, 0)
+use_collision = true
+size = Vector3(2, 5, 7)
+material = SubResource("porcelain_mat")
+
+[node name="Water" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, 0.35, 0)
+mesh = SubResource("water_mesh")
+surface_material_override/0 = SubResource("water_mat")
+
+[node name="Swirl" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, 0.55, 0)
+visible = false
+
+[node name="Spoke1" type="MeshInstance3D" parent="Swirl"]
+mesh = SubResource("spoke_mesh")
+surface_material_override/0 = SubResource("swirl_mat")
+
+[node name="Spoke2" type="MeshInstance3D" parent="Swirl"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 0, 0, 0)
+mesh = SubResource("spoke_mesh")
+surface_material_override/0 = SubResource("swirl_mat")
+
+[node name="NameLabel" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.1, 6.2, 0)
+pixel_size = 0.02
+billboard = 1
+text = "ゴール"
+font_size = 64
+outline_size = 12
